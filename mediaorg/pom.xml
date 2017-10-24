@@ -11,49 +11,66 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<tika.version>1.16</tika.version>
+		<logback.version>1.2.3</logback.version>
+		<slf4j.version>1.7.25</slf4j.version>
+		<java.version>1.8</java.version>
+		<java.target.version>${java.version}</java.target.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-xmp</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-serialization</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-dl</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-batch</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-app</artifactId>
-			<version>1.16</version>
+			<version>${tika.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -65,19 +82,19 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.25</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
+			<version>${logback.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.2.3</version>
+			<version>${logback.version}</version>
 		</dependency>
 
 		<dependency>
@@ -106,8 +123,8 @@
 					<debuglevel>lines,vars,source</debuglevel>
 					<optimize>true</optimize>
 					<verbose>false</verbose>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${java.target.version}</source>
+					<target>${java.target.version}</target>
 				</configuration>
 
 

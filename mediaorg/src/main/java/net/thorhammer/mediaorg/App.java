@@ -9,7 +9,8 @@ import java.nio.file.Paths;
 
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.sax.BodyContentHandler;
+import org.apache.tika.sax.ToXMLContentHandler;
+import org.xml.sax.ContentHandler;
 
 public class App {
     public static void main(String[] args) throws IOException {
@@ -22,7 +23,8 @@ public class App {
     }
 
     private static String parseToPlainText(Path p) {
-        BodyContentHandler handler = new BodyContentHandler();
+        // BodyContentHandler handler = new BodyContentHandler();
+        ContentHandler handler = new ToXMLContentHandler();
         AutoDetectParser parser = new AutoDetectParser();
         Metadata metadata = new Metadata();
         try (InputStream stream = new FileInputStream(p.toFile())) {
