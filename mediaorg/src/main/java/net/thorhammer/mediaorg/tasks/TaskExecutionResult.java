@@ -8,6 +8,6 @@ public interface TaskExecutionResult {
 
     String getExecutionReturnMessage();
 
-    Collection<TaskVariableValue> getExecutionVariables();
+    Collection<TaskVariableValue<?>> getExecutionVariables();
 
 }

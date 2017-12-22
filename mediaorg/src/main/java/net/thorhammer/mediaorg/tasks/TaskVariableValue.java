@@ -1,9 +1,9 @@
 package net.thorhammer.mediaorg.tasks;
 
-public interface TaskVariableValue {
+public interface TaskVariableValue<T> {
     
-    TaskVariableDefinition getDefinition();
+    TaskVariableDefinition<T> getDefinition();
 
-    String getValue();
-    
+    T getValue();
+
 }

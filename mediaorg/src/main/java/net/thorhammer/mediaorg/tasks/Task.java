@@ -6,18 +6,19 @@ import java.util.function.Consumer;
 
 public interface Task extends WithNameAndDescription {
 
-    Collection<TaskVariableDefinition> getVariablesProduced();
+    Collection<TaskVariableDefinition<?>> getVariablesProduced();
     
-    Collection<TaskVariableDefinition> getRequiredInputVariables();
+    Collection<TaskVariableDefinition<?>> getRequiredInputVariables();
 
-    void execute(Collection<TaskVariableValue> variables, Consumer<TaskExecution> executionResultConsumer);
+    void execute(Collection<TaskVariableValue<?>> variables, Consumer<TaskExecution> executionResultConsumer);
 
-    default boolean areRequiredVariablesAvailable(Collection<TaskVariableValue> values) {
+    default boolean areRequiredVariablesAvailable(Collection<TaskVariableValue<?>> values) {
         return values != null && getRequiredInputVariables().stream().allMatch(iv -> values.stream().anyMatch(v -> v.getDefinition().equals(iv)));
     }
 
-    default TaskVariableValue getInputVariable(TaskVariableDefinition varDef, Collection<TaskVariableValue> values) {
-        return values.stream().filter(v -> v.getDefinition().equals(varDef)).findFirst().get();
+    @SuppressWarnings("unchecked")
+    default <T> TaskVariableValue<T> getInputVariable(TaskVariableDefinition<T> varDef, Collection<TaskVariableValue<?>> values) {
+        return (TaskVariableValue<T>) values.stream().filter(v -> v.getDefinition().equals(varDef)).findFirst().get();
     }
 
     default TaskExecutionResult failedMissingInputVariables() {

@@ -24,14 +24,21 @@ import net.thorhammer.mediaorg.tasks.TaskVariableValueImpl;
 public class DeleteFile implements Task {
     private static final Logger LOG = LoggerFactory.getLogger("mediaorg.tasks.DeleteFile");
 
-    private static final TaskVariableDefinition SOURCE_PATH = new TaskVariableDefinitionImpl("sourcePath", "The fully qualified path of the file to delete");
-    private static final TaskVariableDefinition SOURCE_FILENAME = new TaskVariableDefinitionImpl("sourceFilename", "The name of the file to delete");
-    private static final TaskVariableDefinition EXECUTION_TIME_MS = new TaskVariableDefinitionImpl(
+    private static final TaskVariableDefinition<String> SOURCE_PATH = new TaskVariableDefinitionImpl<>(
+            "sourcePath",
+            "The fully qualified path of the file to delete",
+            String.class);
+    private static final TaskVariableDefinition<String> SOURCE_FILENAME = new TaskVariableDefinitionImpl<>(
+            "sourceFilename",
+            "The name of the file to delete",
+            String.class);
+    private static final TaskVariableDefinition<Long> EXECUTION_TIME_MS = new TaskVariableDefinitionImpl<>(
             "executionTimeMs",
-            "Time taken to delete file");
+            "Time taken to delete file",
+            Long.class);
 
-    private static final Collection<TaskVariableDefinition> VARIABLES_PRODUCED = Arrays.asList(EXECUTION_TIME_MS);
-    private static final Collection<TaskVariableDefinition> VARIABLES_CONSUMED = Arrays.asList(SOURCE_PATH, SOURCE_FILENAME);
+    private static final Collection<TaskVariableDefinition<?>> VARIABLES_PRODUCED = Arrays.asList(EXECUTION_TIME_MS);
+    private static final Collection<TaskVariableDefinition<?>> VARIABLES_CONSUMED = Arrays.asList(SOURCE_PATH, SOURCE_FILENAME);
 
     public DeleteFile() {
         super();
@@ -48,17 +55,17 @@ public class DeleteFile implements Task {
     }
 
     @Override
-    public Collection<TaskVariableDefinition> getVariablesProduced() {
+    public Collection<TaskVariableDefinition<?>> getVariablesProduced() {
         return VARIABLES_PRODUCED;
     }
 
     @Override
-    public Collection<TaskVariableDefinition> getRequiredInputVariables() {
+    public Collection<TaskVariableDefinition<?>> getRequiredInputVariables() {
         return VARIABLES_CONSUMED;
     }
 
     @Override
-    public void execute(Collection<TaskVariableValue> variables, Consumer<TaskExecution> executionResultConsumer) {
+    public void execute(Collection<TaskVariableValue<?>> variables, Consumer<TaskExecution> executionResultConsumer) {
         long ts0 = System.currentTimeMillis();
 
         if (!this.areRequiredVariablesAvailable(variables)) {
@@ -66,8 +73,8 @@ public class DeleteFile implements Task {
             return;
         }
 
-        TaskVariableValue sourcePathVar = this.getInputVariable(SOURCE_PATH, variables);
-        TaskVariableValue sourceFilename = this.getInputVariable(SOURCE_FILENAME, variables);
+        TaskVariableValue<String> sourcePathVar = this.getInputVariable(SOURCE_PATH, variables);
+        TaskVariableValue<String> sourceFilename = this.getInputVariable(SOURCE_FILENAME, variables);
 
         try {
 
@@ -75,7 +82,7 @@ public class DeleteFile implements Task {
 
             Files.delete(sourcePath);
 
-            TaskVariableValue executionTimeMs = new TaskVariableValueImpl(Long.valueOf(System.currentTimeMillis() - ts0).toString(), EXECUTION_TIME_MS);
+            TaskVariableValue<Long> executionTimeMs = new TaskVariableValueImpl<>(Long.valueOf(System.currentTimeMillis() - ts0), EXECUTION_TIME_MS);
 
             TaskExecutionResult executionResult = new TaskExecutionResultImpl(true, null, Arrays.asList(executionTimeMs));
             TaskExecution te = new TaskExecutionImpl(TaskExecutionState.COMPLETED_SUCCESSFULLY, 100, executionResult);

@@ -1,9 +1,8 @@
 package net.thorhammer.mediaorg.mediaorgtasks;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -22,46 +21,45 @@ import net.thorhammer.mediaorg.tasks.TaskVariableDefinitionImpl;
 import net.thorhammer.mediaorg.tasks.TaskVariableValue;
 import net.thorhammer.mediaorg.tasks.TaskVariableValueImpl;
 
-public class CopyToTarget implements Task {
-    private static final Logger LOG = LoggerFactory.getLogger("mediaorg.tasks.CopyToTarget");
+public class ExtractMetadata implements Task {
+    private static final Logger LOG = LoggerFactory.getLogger("mediaorg.tasks.ExtractMetadata");
 
     private static final TaskVariableDefinition<String> SOURCE_PATH = new TaskVariableDefinitionImpl<>(
             "sourcePath",
-            "The fully qualified file path to copy",
+            "The fully qualified path of the files from which to extract shooting date",
             String.class);
+    
     private static final TaskVariableDefinition<String> SOURCE_FILENAME = new TaskVariableDefinitionImpl<>(
             "sourceFilename",
-            "The name of the file to copy",
+            "The name of the file from which you want to extract the shooting date",
             String.class);
-    private static final TaskVariableDefinition<String> TARGET_FILENAME = new TaskVariableDefinitionImpl<>(
-            "targetFilename",
-            "The target name of the file to copy",
-            String.class);
-    private static final TaskVariableDefinition<String> TARGET_PATH = new TaskVariableDefinitionImpl<>(
-            "targetPath",
-            "Path of destination folder",
-            String.class);
-
+    
     private static final TaskVariableDefinition<Long> EXECUTION_TIME_MS = new TaskVariableDefinitionImpl<>(
             "executionTimeMs",
-            "Time taken to copy file over to destination",
+            "Time taken to execute task",
             Long.class);
 
-    private static final Collection<TaskVariableDefinition<?>> VARIABLES_PRODUCED = Arrays.asList(TARGET_PATH, TARGET_FILENAME, EXECUTION_TIME_MS);
-    private static final Collection<TaskVariableDefinition<?>> VARIABLES_CONSUMED = Arrays.asList(SOURCE_PATH, SOURCE_FILENAME, TARGET_PATH, TARGET_FILENAME);
+    private static final TaskVariableDefinition<LocalDateTime> SHOOTING_DATETIME = new TaskVariableDefinitionImpl<>(
+            "shootingDateTime",
+            "Time of shooting of given file",
+            LocalDateTime.class);
 
-    public CopyToTarget() {
+    private static final Collection<TaskVariableDefinition<?>> VARIABLES_PRODUCED = Arrays.asList(SHOOTING_DATETIME, EXECUTION_TIME_MS);
+    
+    private static final Collection<TaskVariableDefinition<?>> VARIABLES_CONSUMED = Arrays.asList(SOURCE_PATH, SOURCE_FILENAME);
+
+    public ExtractMetadata() {
         super();
     }
 
     @Override
     public String getName() {
-        return "CopyToTargetTask";
+        return "ObtainShootingTimestamp";
     }
 
     @Override
     public String getDescription() {
-        return "Copies a file to a destination folder";
+        return "Extracts metadata from a media file";
     }
 
     @Override
@@ -85,30 +83,22 @@ public class CopyToTarget implements Task {
 
         TaskVariableValue<String> sourcePathVar = this.getInputVariable(SOURCE_PATH, variables);
         TaskVariableValue<String> sourceFilename = this.getInputVariable(SOURCE_FILENAME, variables);
-        TaskVariableValue<String> targetPathVar = this.getInputVariable(TARGET_PATH, variables);
-        TaskVariableValue<String> targetFilename = this.getInputVariable(TARGET_FILENAME, variables);
 
         try {
 
             Path sourcePath = Paths.get(sourcePathVar.getValue(), sourceFilename.getValue());
-            Path targetPath = Paths.get(targetPathVar.getValue(), targetFilename.getValue());
 
-            Path fullDestinationPath = Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            // TODO use API to get shooting date & other metadata
 
-            TaskVariableValue<String> actualTargetPathVar = new TaskVariableValueImpl<>(fullDestinationPath.getParent().toString(), TARGET_PATH);
-            TaskVariableValue<String> actualTargetFileVar = new TaskVariableValueImpl<>(fullDestinationPath.getFileName().toString(), TARGET_FILENAME);
             TaskVariableValue<Long> executionTimeMs = new TaskVariableValueImpl<>(Long.valueOf(System.currentTimeMillis() - ts0), EXECUTION_TIME_MS);
 
-            TaskExecutionResult executionResult = new TaskExecutionResultImpl(
-                    true,
-                    null,
-                    Arrays.asList(actualTargetPathVar, actualTargetFileVar, executionTimeMs));
+            TaskExecutionResult executionResult = new TaskExecutionResultImpl(true, null, Arrays.asList(executionTimeMs));
             TaskExecution te = new TaskExecutionImpl(TaskExecutionState.COMPLETED_SUCCESSFULLY, 100, executionResult);
 
             executionResultConsumer.accept(te);
 
         } catch (Exception ex) {
-            LOG.error("Exception while attempting to copy {}/{} to {}/{}", sourcePathVar, sourceFilename, targetPathVar, targetFilename, ex);
+            LOG.error("Exception while attempting to extract metadata from {}/{}", sourcePathVar, sourceFilename, ex);
 
             executionResultConsumer.accept(failWith(failedWithException(ex)));
             return;
